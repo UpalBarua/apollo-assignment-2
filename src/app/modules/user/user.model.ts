@@ -1,7 +1,12 @@
-import { model, Schema, Document } from 'mongoose';
-import { TUser, TFullName, TAddress, TOrder } from './user.interface';
+import { model, Schema, Document, Model } from 'mongoose';
+import type { TUser, TFullName, TAddress, TOrder } from './user.interface';
+import bcrypt from 'bcrypt';
 
 type TUserSchema = Document & TUser;
+
+type UserModel = Model<TUser> & {
+  getExistingUser: (userId: string) => Promise<TUser>;
+};
 
 const fullNameSchema = new Schema<TFullName>({
   firstName: {
@@ -58,7 +63,7 @@ const orderSchema = new Schema<TOrder>({
   },
 });
 
-const userSchema = new Schema<TUserSchema>({
+const userSchema = new Schema<TUserSchema, UserModel>({
   userId: {
     type: Number,
     required: [true, 'User ID is required'],
@@ -107,6 +112,27 @@ const userSchema = new Schema<TUserSchema>({
   orders: { type: [orderSchema] },
 });
 
-const User = model<TUserSchema>('User', userSchema);
+userSchema.statics.getExistingUser = async (userId: string) => {
+  const existingUser = User.findOne({ userId });
+  return existingUser;
+};
+
+userSchema.pre('save', function (next) {
+  var user = this;
+
+  if (!user.isModified('password')) return next();
+
+  bcrypt.genSalt(process.env.SALT_WORK_FACTOR, function (err, salt) {
+    if (err) return next(err);
+
+    bcrypt.hash(user.password, salt, function (err, hash) {
+      if (err) return next(err);
+      user.password = hash;
+      next();
+    });
+  });
+});
+
+const User = model<TUserSchema, UserModel>('User', userSchema);
 
 export default User;

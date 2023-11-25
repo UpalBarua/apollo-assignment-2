@@ -1,12 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import { userValidationSchema } from './user.interface';
+import { order, userValidationSchema } from './user.interface';
 import {
   deleteUserFromDB,
   findAllUsers,
   findUserById,
+  findUserOrders,
+  insertNewOrder,
   insertUserInDB,
+  sumOrdersTotalPrice,
   updateUserFromDB,
-} from './user.services';
+} from './user.service';
 
 export const createNewUser = async (
   req: Request,
@@ -166,7 +169,7 @@ export const updateUser = async (
       });
     }
 
-    const updatedUser = await updateUserFromDB(userId, validationResults.data);
+    const updatedUser = await updateUserFromDB(validationResults.data);
 
     if (updatedUser) {
       return res.status(200).json({
@@ -179,6 +182,83 @@ export const updateUser = async (
     res.status(400).json({
       success: false,
       message: 'something went wrong',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addNewOrder = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      params: { userId },
+      body,
+    } = req;
+
+    const validationResults = order.safeParse(body);
+
+    if (!validationResults.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'something went wrong',
+        error: validationResults.error,
+      });
+    }
+
+    await insertNewOrder(userId as string, validationResults.data);
+
+    res.status(201).json({
+      success: true,
+      message: 'order created successfully!',
+      data: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      params: { userId },
+    } = req;
+
+    const orders = await findUserOrders(userId as string);
+
+    res.status(200).json({
+      success: true,
+      message: 'orders retrieved successfully',
+      data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOrdersTotalPrice = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      params: { userId },
+    } = req;
+
+    const totalPrice = await sumOrdersTotalPrice(userId as string);
+
+    res.status(200).json({
+      success: false,
+      message: 'total price of all the orders retrieved',
+      data: totalPrice,
     });
   } catch (error) {
     next(error);

@@ -2,8 +2,8 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import userRoutes from './app/modules/user/user.routes';
 import errorHandler from './app/middlewares/error-handler';
+import userRoutes from './app/modules/user/user.routes';
 
 const app = express();
 
@@ -13,13 +13,13 @@ app.use(morgan('dev'));
 app.use(helmet());
 app.use(errorHandler);
 
+app.use('/api/users', userRoutes);
+
 app.all('*', (req: Request, res: Response) => {
   res.status(404).json({
     success: false,
-    message: 'route not found',
+    message: 'Endpoint not found. Please check the URL and try again.',
   });
 });
-
-app.use('/api/users', userRoutes);
 
 export default app;

@@ -11,7 +11,7 @@ const address = z.object({
   country: z.string().min(1, { message: 'Country must not be empty' }),
 });
 
-const order = z.object({
+export const order = z.object({
   productName: z.string().min(1, { message: 'Product name must not be empty' }),
   price: z.number().positive({ message: 'Price must be a positive number' }),
   quantity: z
@@ -35,7 +35,7 @@ export const userValidationSchema = z.object({
   isActive: z.boolean(),
   hobbies: z.array(z.string().min(1, { message: 'Hobby must not be empty' })),
   address: address,
-  orders: z.array(order),
+  orders: z.array(order).optional(),
 });
 
 export type TFullName = z.infer<typeof fullName>;

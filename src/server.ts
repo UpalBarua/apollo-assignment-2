@@ -5,11 +5,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const port = process.env.PORT;
-const uri = process.env.DB_URI || '';
+const uri = process.env.DB_URI;
 
 const main = async () => {
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri as string);
     app.listen(port, () => {
       console.log('[server] running on http://localhost:8080/');
     });
