@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { userValidationSchema } from './user.interface';
 import {
   deleteUserFromDB,
@@ -8,7 +8,11 @@ import {
   updateUserFromDB,
 } from './user.services';
 
-export const createNewUser = async (req: Request, res: Response) => {
+export const createNewUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { body } = req;
 
@@ -37,15 +41,15 @@ export const createNewUser = async (req: Request, res: Response) => {
       message: 'something went wrong',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'something went wrong',
-      error,
-    });
+    next(error);
   }
 };
 
-export const getAllUsers = async (req: Request, res: Response) => {
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const allUsers = await findAllUsers();
 
@@ -62,15 +66,15 @@ export const getAllUsers = async (req: Request, res: Response) => {
       message: 'something went wrong',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'something went wrong',
-      error,
-    });
+    next(error);
   }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { userId } = req.params;
 
@@ -96,15 +100,15 @@ export const getUserById = async (req: Request, res: Response) => {
       message: 'something went wrong',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'something went wrong',
-      error,
-    });
+    next(error);
   }
 };
 
-export const deleteUserById = async (req: Request, res: Response) => {
+export const deleteUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { userId } = req.params;
 
@@ -130,15 +134,15 @@ export const deleteUserById = async (req: Request, res: Response) => {
       message: 'something went wrong',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'something went wrong',
-      error,
-    });
+    next(error);
   }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const {
       params: { userId },
@@ -177,10 +181,6 @@ export const updateUser = async (req: Request, res: Response) => {
       message: 'something went wrong',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'something went wrong',
-      error,
-    });
+    next(error);
   }
 };
