@@ -1,14 +1,15 @@
-import { model, Schema, Document, Model } from 'mongoose';
-import type { TUser, TFullName, TAddress, TOrder } from './user.interface';
 import bcrypt from 'bcrypt';
+import { Document, Model, Schema, model } from 'mongoose';
+import { SALT_WORK_FACTOR } from '../../config';
+import type { Address, FullName, Order, TUser } from './user.interface';
 
-type TUserSchema = Document & TUser;
+type UserSchema = Document & TUser;
 
 type UserModel = Model<TUser> & {
-  getExistingUser: (userId: string) => Promise<TUser>;
+  getExistingUser: (userId: number) => Promise<TUser>;
 };
 
-const fullNameSchema = new Schema<TFullName>({
+const fullNameSchema = new Schema<FullName>({
   firstName: {
     type: String,
     required: [true, 'First name is required'],
@@ -21,7 +22,7 @@ const fullNameSchema = new Schema<TFullName>({
   },
 });
 
-const addressSchema = new Schema<TAddress>({
+const addressSchema = new Schema<Address>({
   street: {
     type: String,
     required: [true, 'Street is required'],
@@ -39,7 +40,7 @@ const addressSchema = new Schema<TAddress>({
   },
 });
 
-const orderSchema = new Schema<TOrder>({
+const orderSchema = new Schema<Order>({
   productName: {
     type: String,
     required: [true, 'Product name is required'],
@@ -55,7 +56,7 @@ const orderSchema = new Schema<TOrder>({
   },
   quantity: {
     type: Number,
-    required: [true, 'Quantity is required'],
+    default: 1,
     validate: {
       validator: (value: number) => Number.isInteger(value) && value > 0,
       message: 'Quantity must be a positive integer',
@@ -63,7 +64,7 @@ const orderSchema = new Schema<TOrder>({
   },
 });
 
-const userSchema = new Schema<TUserSchema, UserModel>({
+const userSchema = new Schema<UserSchema, UserModel>({
   userId: {
     type: Number,
     required: [true, 'User ID is required'],
@@ -112,9 +113,8 @@ const userSchema = new Schema<TUserSchema, UserModel>({
   orders: { type: [orderSchema] },
 });
 
-userSchema.statics.getExistingUser = async (userId: string) => {
-  const existingUser = User.findOne({ userId });
-  return existingUser;
+userSchema.statics.getExistingUser = async (userId: number) => {
+  return await User.findOne({ userId });
 };
 
 userSchema.pre('save', function (next) {
@@ -122,10 +122,10 @@ userSchema.pre('save', function (next) {
 
   if (!user.isModified('password')) return next();
 
-  bcrypt.genSalt(process.env.SALT_WORK_FACTOR, function (err, salt) {
+  bcrypt.genSalt(Number(SALT_WORK_FACTOR), (err, salt) => {
     if (err) return next(err);
 
-    bcrypt.hash(user.password, salt, function (err, hash) {
+    bcrypt.hash(user.password, salt, (err, hash) => {
       if (err) return next(err);
       user.password = hash;
       next();
@@ -133,6 +133,6 @@ userSchema.pre('save', function (next) {
   });
 });
 
-const User = model<TUserSchema, UserModel>('User', userSchema);
+const User = model<UserSchema, UserModel>('User', userSchema);
 
 export default User;

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { order, userValidationSchema } from './user.interface';
+import { orderSchema, userValidationSchema } from './user.interface';
 import {
   deleteUserFromDB,
   findAllUsers,
@@ -24,7 +24,7 @@ export const createNewUser = async (
     if (!validationResults.success) {
       return res.status(400).json({
         success: false,
-        message: 'something went wrong',
+        message: 'Something went wrong',
         error: validationResults.error,
       });
     }
@@ -34,14 +34,15 @@ export const createNewUser = async (
     if (result) {
       return res.status(201).json({
         success: true,
-        message: 'successfully created new user',
+        message: 'User created successfully!',
         data: result,
       });
     }
 
     res.status(400).json({
       success: false,
-      message: 'something went wrong',
+      message: 'Something went wrong',
+      data: null,
     });
   } catch (error) {
     next(error);
@@ -88,12 +89,12 @@ export const getUserById = async (
       });
     }
 
-    const user = await findUserById(userId);
+    const user = await findUserById(Number(userId));
 
     if (user) {
       return res.status(200).json({
         success: true,
-        message: 'successfully retrieved specific user',
+        message: 'User fetched successfully!',
         data: user,
       });
     }
@@ -127,7 +128,7 @@ export const deleteUserById = async (
     if (user) {
       return res.status(202).json({
         success: true,
-        message: 'successfully deleted specific user',
+        message: 'User deleted successfully',
         data: null,
       });
     }
@@ -199,7 +200,7 @@ export const addNewOrder = async (
       body,
     } = req;
 
-    const validationResults = order.safeParse(body);
+    const validationResults = orderSchema.safeParse(body);
 
     if (!validationResults.success) {
       return res.status(400).json({
@@ -209,7 +210,7 @@ export const addNewOrder = async (
       });
     }
 
-    await insertNewOrder(userId as string, validationResults.data);
+    await insertNewOrder(Number(userId), validationResults.data);
 
     res.status(201).json({
       success: true,

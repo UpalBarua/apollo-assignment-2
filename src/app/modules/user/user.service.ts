@@ -1,23 +1,22 @@
-import { TOrder, TUser } from './user.interface';
+import type { Order, TUser } from './user.interface';
 import User from './user.model';
 
 export const insertUserInDB = async (newUserData: TUser) => {
-  const existingUser = await User.getExistingUser(
-    newUserData.userId.toString()
-  );
+  const existingUser = await User.getExistingUser(newUserData.userId);
 
   if (existingUser) {
     throw new Error('userId already exists');
   }
 
   const newUser = new User(newUserData);
-  const result = await newUser.save();
+  await newUser.save();
 
-  return result;
+  return await User.findOne({ userId: newUserData.userId }).select('-password');
 };
 
 export const findAllUsers = async () => {
-  const allUsers = await User.find({}).select({
+  return await User.find({}).select({
+    _id: 0,
     userId: 1,
     username: 1,
     fullName: 1,
@@ -25,17 +24,16 @@ export const findAllUsers = async () => {
     age: 1,
     address: 1,
   });
-  return allUsers;
 };
 
-export const findUserById = async (userId: string) => {
-  const existingUser = await User.getExistingUser(userId.toString());
+export const findUserById = async (userId: number) => {
+  const existingUser = await User.getExistingUser(userId);
 
   if (!existingUser) {
     throw new Error('user does not exist');
   }
 
-  return existingUser;
+  return await User.findOne({ userId }).select('-password');
 };
 
 export const deleteUserFromDB = async (userId: string) => {
@@ -45,27 +43,26 @@ export const deleteUserFromDB = async (userId: string) => {
     throw new Error('user does not exist');
   }
 
-  const deletedUser = await User.findOneAndDelete({ userId });
-  return deletedUser;
+  return await User.findOneAndDelete({ userId });
 };
 
 export const updateUserFromDB = async (user: TUser) => {
-  const existingUser = await User.getExistingUser(user.userId.toString());
+  const existingUser = await User.getExistingUser(user.userId);
 
   if (!existingUser) {
     throw new Error('user does not exist');
   }
 
-  const updatedUser = await User.updateOne(
+  await User.updateOne(
     { userId: user.userId },
     { $set: user },
-    { new: true }
+    { upsert: true }
   );
 
-  return updatedUser;
+  return await User.findOne({ userId: user.userId }).select('-password');
 };
 
-export const insertNewOrder = async (userId: string, order: TOrder) => {
+export const insertNewOrder = async (userId: number, order: Order) => {
   const existingUser = await User.getExistingUser(userId);
 
   if (!existingUser) {
@@ -94,7 +91,7 @@ export const findUserOrders = async (userId: string) => {
     throw new Error('user does not exist');
   }
 
-  return existingUser.orders;
+  return await User.findOne({ userId }).select({ orders: 1, _id: 0 });
 };
 
 export const sumOrdersTotalPrice = async (userId: string) => {

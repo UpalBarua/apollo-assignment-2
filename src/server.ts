@@ -1,16 +1,11 @@
 import mongoose from 'mongoose';
 import app from './app';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const port = process.env.PORT;
-const uri = process.env.DB_URI;
+import { DB_URI, PORT } from './app/config';
 
 const main = async () => {
   try {
-    await mongoose.connect(uri as string);
-    app.listen(port, () => {
+    await mongoose.connect(DB_URI as string);
+    app.listen(PORT, () => {
       console.log('[server] running on http://localhost:8080/');
     });
   } catch (error) {
