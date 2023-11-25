@@ -14,7 +14,6 @@ app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.use((0, morgan_1.default)('dev'));
 app.use((0, helmet_1.default)());
-app.use(error_handler_1.default);
 app.use('/api/users', user_routes_1.default);
 app.all('*', (req, res) => {
     res.status(404).json({
@@ -22,5 +21,6 @@ app.all('*', (req, res) => {
         message: 'Endpoint not found. Please check the URL and try again.',
     });
 });
+app.use(error_handler_1.default);
 exports.default = app;
 //# sourceMappingURL=app.js.map

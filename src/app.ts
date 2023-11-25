@@ -11,7 +11,6 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
 app.use(helmet());
-app.use(errorHandler);
 
 app.use('/api/users', userRoutes);
 
@@ -21,5 +20,7 @@ app.all('*', (req: Request, res: Response) => {
     message: 'Endpoint not found. Please check the URL and try again.',
   });
 });
+
+app.use(errorHandler);
 
 export default app;
