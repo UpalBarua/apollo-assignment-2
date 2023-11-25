@@ -123,7 +123,7 @@ export const deleteUserById = async (
       });
     }
 
-    const user = await deleteUserFromDB(userId);
+    const user = await deleteUserFromDB(Number(userId));
 
     if (user) {
       return res.status(202).json({
@@ -232,7 +232,7 @@ export const getUserOrders = async (
       params: { userId },
     } = req;
 
-    const orders = await findUserOrders(userId as string);
+    const orders = await findUserOrders(Number(userId));
 
     res.status(200).json({
       success: true,
@@ -254,7 +254,7 @@ export const getOrdersTotalPrice = async (
       params: { userId },
     } = req;
 
-    const totalPrice = await sumOrdersTotalPrice(userId as string);
+    const totalPrice = await sumOrdersTotalPrice(Number(userId));
 
     res.status(200).json({
       success: false,

@@ -4,7 +4,7 @@ import { DB_URI, PORT } from './app/config';
 
 const main = async () => {
   try {
-    await mongoose.connect(DB_URI as string);
+    await mongoose.connect(DB_URI);
     app.listen(PORT, () => {
       console.log('[server] running on http://localhost:8080/');
     });

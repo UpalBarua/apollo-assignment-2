@@ -133,6 +133,16 @@ userSchema.pre('save', function (next) {
   });
 });
 
+userSchema.pre('find', function (next) {
+  this.find({}).select('-password');
+  next();
+});
+
+userSchema.pre('findOne', function (next) {
+  this.findOne({}).select('-password');
+  next();
+});
+
 const User = model<UserSchema, UserModel>('User', userSchema);
 
 export default User;
